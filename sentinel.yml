@@ -1,0 +1,11 @@
+# Secrets come from the environment; ${VAR:-default} supplies local defaults.
+datasources:
+  clinic:
+    url: ${CLINIC_DB_URL:-postgresql+psycopg://postgres:postgres@localhost:5432/clinic}
+results_url: ${SENTINEL_RESULTS_URL:-postgresql+psycopg://postgres:postgres@localhost:5432/sentinel}
+suites_dir: checks
+schedule_cron: "0 * * * *"
+alerts:
+  webhook_url: ${SENTINEL_WEBHOOK_URL:-}
+  cooldown_minutes: 120
+  min_severity: critical

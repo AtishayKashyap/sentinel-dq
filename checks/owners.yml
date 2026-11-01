@@ -1,0 +1,12 @@
+datasource: clinic
+table: owners
+pii_columns: [full_name, email, phone]
+checks:
+  - type: unique
+    columns: [id]
+  - type: null_rate
+    column: email
+    max: 0.02
+    description: Reminder emails need a contact address
+  - type: not_null
+    column: full_name
