@@ -1,0 +1,31 @@
+datasource: clinic
+table: animals
+checks:
+  - type: referential
+    column: owner_id
+    ref_table: owners
+    ref_column: id
+    description: Every animal must belong to a known owner
+  - type: accepted_values
+    column: species
+    values: [dog, cat, cattle, sheep]
+  - type: range
+    column: weight_kg
+    min: 0.1
+    max: 1500
+    severity: warning
+  - type: drift
+    name: cattle_weight
+    column: weight_kg
+    filter: {species: cattle}
+    bins: 5
+    psi_threshold: 0.25
+    recent_column: registered_at
+    recent_days: 2
+    min_rows: 40
+    severity: warning
+  - type: row_count_anomaly
+    name: daily_registrations
+    recent_column: registered_at
+    recent_hours: 24
+    z_threshold: 3

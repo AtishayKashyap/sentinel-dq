@@ -1,0 +1,34 @@
+datasource: clinic
+table: vaccinations
+checks:
+  - type: unique
+    columns: [external_ref]
+    description: Upstream messages must be ingested exactly once
+  - type: referential
+    column: animal_id
+    ref_table: animals
+    ref_column: id
+  - type: null_rate
+    column: lot_number
+    max: 0.02
+    severity: warning
+    description: Lot numbers are required for recall traceability
+  - type: range
+    column: dose_ml
+    min: 0.1
+    max: 10
+  - type: accepted_values
+    column: vaccine_code
+    values: [RAB-1, DHPP, FVRCP, BVD, CLOST-7, LEPTO]
+  - type: freshness
+    column: administered_at
+    max_lag_hours: 30
+  - type: custom_sql
+    name: vaccinated_before_registration
+    description: A vaccination cannot predate the animal's registration
+    sql: >
+      SELECT COUNT(*) FROM vaccinations v
+      JOIN animals a ON a.id = v.animal_id
+      WHERE v.administered_at < a.registered_at
+    max_failures: 0
+    severity: warning
