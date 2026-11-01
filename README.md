@@ -2,7 +2,7 @@
 
 **Declarative data-quality and drift monitoring for SQL databases.** Describe what "good data" means in YAML; sentinel-dq compiles each rule to a single aggregated SQL query, runs it on PostgreSQL, MySQL or SQLite, stores every result, alerts on state changes, and shows trends in a React dashboard.
 
-[![CI](https://img.shields.io/badge/CI-GitHub_Actions-2088FF)](.github/workflows/ci.yml)
+[![CI](https://github.com/AtishayKashyap/sentinel-dq/actions/workflows/ci.yml/badge.svg)](https://github.com/AtishayKashyap/sentinel-dq/actions/workflows/ci.yml)
 ![coverage](https://img.shields.io/badge/coverage-98%25-brightgreen)
 ![dialects](https://img.shields.io/badge/tested_on-PostgreSQL_16_%7C_MySQL_8_%7C_SQLite-blue)
 ![types](https://img.shields.io/badge/mypy-strict-blue)
