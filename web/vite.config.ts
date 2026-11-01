@@ -3,6 +3,8 @@ import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
 export default defineConfig({
+  // "/sentinel-dq/" for the GitHub Pages demo; "/" everywhere else.
+  base: process.env.VITE_BASE ?? "/",
   plugins: [react()],
   server: {
     // In dev the API runs on :8000; proxying avoids CORS entirely.

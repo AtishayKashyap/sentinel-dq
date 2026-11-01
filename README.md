@@ -7,6 +7,8 @@
 ![dialects](https://img.shields.io/badge/tested_on-PostgreSQL_16_%7C_MySQL_8_%7C_SQLite-blue)
 ![types](https://img.shields.io/badge/mypy-strict-blue)
 
+**[▶ Live demo](https://atishaykashyap.github.io/sentinel-dq/)**: the real dashboard, running on data from a simulated veterinary-clinic database with deliberately injected defects. It's rebuilt weekly by CI (`.github/workflows/pages.yml`) with no backend: `sentinel export-static` writes the API's responses as JSON, and the same React build reads them.
+
 ![Overview](docs/screenshots/overview-light.png)
 
 ## Why

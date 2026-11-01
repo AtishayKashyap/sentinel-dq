@@ -1,6 +1,8 @@
+import { useQuery } from "@tanstack/react-query";
 import { lazy, Suspense } from "react";
 import { NavLink, Route, Routes } from "react-router-dom";
 import { Card, Loading } from "./components/ui";
+import { STATIC, staticApi } from "./lib/api";
 import { Overview } from "./pages/Overview";
 
 // Overview ships in the main bundle (first paint); chart-heavy pages load on demand
@@ -9,9 +11,22 @@ const TablePage = lazy(() => import("./pages/TablePage").then((m) => ({ default:
 const CheckPage = lazy(() => import("./pages/CheckPage").then((m) => ({ default: m.CheckPage })));
 const RunsPage = lazy(() => import("./pages/RunsPage").then((m) => ({ default: m.RunsPage })));
 
+function DemoBanner() {
+  const meta = useQuery({ queryKey: ["meta"], queryFn: staticApi.meta, enabled: STATIC });
+  if (!STATIC) return null;
+  const when = meta.data ? new Date(meta.data.generated_at).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" }) : "…";
+  return (
+    <div className="demo-banner" role="note">
+      Live demo · a simulated veterinary-clinic database with deliberately injected defects, re-run weekly (last: {when}).{" "}
+      <a href="https://github.com/AtishayKashyap/sentinel-dq">Source on GitHub</a>
+    </div>
+  );
+}
+
 export function App() {
   return (
     <>
+      <DemoBanner />
       <header className="topbar">
         <div className="brand">
           <span className="brand-mark" aria-hidden>

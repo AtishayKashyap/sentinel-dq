@@ -74,12 +74,37 @@ export class ApiError extends Error {
 }
 
 async function get<T>(path: string): Promise<T> {
-  const res = await fetch(`${BASE}${path}`, { headers: { accept: "application/json" } });
+  const url = path.startsWith("/api/") ? `${BASE}${path}` : path;
+  const res = await fetch(url, { headers: { accept: "application/json" } });
   if (!res.ok) throw new ApiError(res.status, `${res.status} ${res.statusText} for ${path}`);
   return (await res.json()) as T;
 }
 
-export const api = {
+/**
+ * Static demo mode (GitHub Pages): the same dashboard, reading JSON files exported by
+ * `sentinel export-static` instead of calling the API. Responses have identical shapes.
+ */
+export const STATIC = import.meta.env.VITE_STATIC === "1";
+const DATA = `${import.meta.env.BASE_URL}data`;
+
+/** Maps each API call to its static file (+ the client-side filtering the API would do). */
+export const staticApi = {
+  tables: () => get<TableHealth[]>(`${DATA}/tables.json`),
+  latest: async (table?: string) => {
+    const rows = await get<CheckResult[]>(`${DATA}/latest.json`);
+    return table ? rows.filter((r) => r.table === table) : rows;
+  },
+  result: (id: number) => get<CheckResult>(`${DATA}/results/${id}.json`),
+  samples: (id: number) => get<Record<string, unknown>[]>(`${DATA}/samples/${id}.json`),
+  history: async (checkId: string, limit = 60) =>
+    (await get<HistoryPoint[]>(`${DATA}/history/${encodeURIComponent(checkId)}.json`)).slice(-limit),
+  // The export holds the default 14-day window; the argument exists for API parity.
+  heatmap: () => get<HeatCell[]>(`${DATA}/heatmap.json`),
+  runs: async (limit = 20) => (await get<Run[]>(`${DATA}/runs.json`)).slice(0, limit),
+  meta: () => get<{ generated_at: string; checks: number }>(`${DATA}/meta.json`),
+};
+
+const liveApi = {
   tables: () => get<TableHealth[]>("/api/tables"),
   latest: (table?: string) =>
     get<CheckResult[]>(`/api/results/latest${table ? `?table=${encodeURIComponent(table)}` : ""}`),
@@ -90,3 +115,5 @@ export const api = {
   heatmap: (days = 14) => get<HeatCell[]>(`/api/heatmap?days=${days}`),
   runs: (limit = 20) => get<Run[]>(`/api/runs?limit=${limit}`),
 };
+
+export const api = STATIC ? staticApi : liveApi;

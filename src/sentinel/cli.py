@@ -97,6 +97,21 @@ def demo(
     simulate(runner.engine(datasource), once, days=days)
 
 
+@app.command("export-static")
+def export_static_cmd(
+    config: ConfigOpt = "sentinel.yml",
+    out: Annotated[
+        str, typer.Option(help="Output directory for the JSON files")
+    ] = "web/public/data",
+) -> None:
+    """Write the dashboard's API responses as static JSON (for the GitHub Pages demo)."""
+    from .static_export import export_static
+
+    project = load_project(config)
+    stats = export_static(Store(make_engine(project.results_url)), out)
+    typer.echo(f"exported {stats['checks']} checks, {stats['files']} files to {out}")
+
+
 @app.command()
 def serve(host: str = "0.0.0.0", port: int = 8000) -> None:  # noqa: S104
     """Run the API server."""

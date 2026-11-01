@@ -63,6 +63,11 @@ h2 { font-size: 15px; font-weight: 600; }
 .num { font-variant-numeric: tabular-nums; }
 
 /* ---------- layout ---------- */
+.demo-banner {
+  padding: 8px 24px; font-size: 13px; text-align: center;
+  background: var(--surface-2); color: var(--muted); border-bottom: 1px solid var(--border);
+}
+.demo-banner a { color: var(--accent); text-decoration: underline; }
 .topbar {
   position: sticky; top: 0; z-index: 10;
   display: flex; align-items: center; gap: 24px;

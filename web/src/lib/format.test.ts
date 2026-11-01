@@ -34,3 +34,25 @@ describe("format helpers", () => {
     expect([scoreTone(95), scoreTone(75), scoreTone(10)]).toEqual(["good", "warn", "bad"]);
   });
 });
+
+describe("static demo mode", () => {
+  it("maps calls to exported files and filters like the API", async () => {
+    const { staticApi } = await import("./api");
+    const calls: string[] = [];
+    const rows = [{ table: "owners", id: 1 }, { table: "animals", id: 2 }];
+    globalThis.fetch = (async (url: string) => {
+      calls.push(url);
+      const body = url.endsWith("latest.json") ? rows : url.endsWith("runs.json") ? [1, 2, 3] : url.includes("history") ? [1, 2, 3, 4] : {};
+      return new Response(JSON.stringify(body), { status: 200 });
+    }) as typeof fetch;
+    expect(await staticApi.latest("animals")).toEqual([{ table: "animals", id: 2 }]);
+    expect(await staticApi.runs(2)).toEqual([1, 2]);
+    expect(await staticApi.history("clinic.a.unique.id", 2)).toEqual([3, 4]);
+    await staticApi.result(7);
+    await staticApi.samples(7);
+    expect(calls).toEqual([
+      "/data/latest.json", "/data/runs.json", "/data/history/clinic.a.unique.id.json",
+      "/data/results/7.json", "/data/samples/7.json",
+    ]);
+  });
+});
