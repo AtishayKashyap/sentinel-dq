@@ -11,3 +11,4 @@ coverage.xml
 node_modules/
 web/dist/
 web/public/data/
+dump.rdb
