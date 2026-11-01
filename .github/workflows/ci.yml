@@ -31,7 +31,7 @@ jobs:
       SENTINEL_TEST_MYSQL_URL: mysql+pymysql://root:mysql@127.0.0.1:3306/sentinel_test
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with: { python-version: "3.12", cache: pip }
       - run: pip install -e ".[dev]"
       - name: Lint
