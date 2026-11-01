@@ -1,0 +1,31 @@
+# Free-tier scheduler: hosted free web services sleep when idle, so instead of an
+# always-on APScheduler process we run the checks from GitHub Actions on a cron.
+# Results land in the same results DB the dashboard reads.
+name: Scheduled data-quality run
+
+on:
+  schedule:
+    - cron: "17 */6 * * *"   # every 6h, off the top of the hour
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  run-checks:
+    runs-on: ubuntu-latest
+    # Skip on forks and until secrets are configured.
+    if: ${{ vars.SENTINEL_SCHEDULE_ENABLED == 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install .
+      - name: Run checks
+        env:
+          CLINIC_DB_URL: ${{ secrets.CLINIC_DB_URL }}
+          SENTINEL_RESULTS_URL: ${{ secrets.SENTINEL_RESULTS_URL }}
+          SENTINEL_WEBHOOK_URL: ${{ secrets.SENTINEL_WEBHOOK_URL }}
+          SENTINEL_LOG_FORMAT: json
+        # Failures are reported via webhook + dashboard; don't mark the workflow red.
+        run: sentinel run --no-fail-on-error

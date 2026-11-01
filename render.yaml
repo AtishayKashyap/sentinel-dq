@@ -1,0 +1,17 @@
+# Render Blueprint (free tier). Databases live on Neon (Postgres) / TiDB Serverless
+# (MySQL) free tiers; paste their URLs into the env vars marked sync: false.
+services:
+  - type: web
+    name: sentinel-dq-api
+    runtime: docker
+    plan: free
+    healthCheckPath: /healthz
+    envVars:
+      - key: CLINIC_DB_URL
+        sync: false
+      - key: SENTINEL_RESULTS_URL
+        sync: false
+      - key: SENTINEL_API_KEY
+        generateValue: true
+      - key: SENTINEL_CORS_ORIGINS
+        sync: false
