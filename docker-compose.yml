@@ -1,0 +1,52 @@
+# Full local stack:  docker compose up --build   ->  dashboard on http://localhost:8080
+# Then seed demo history:  docker compose run --rm api sentinel demo
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./deploy/initdb.sql:/docker-entrypoint-initdb.d/initdb.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 3s
+      retries: 20
+
+  mysql:
+    # Optional MySQL source to demo cross-dialect checks: docker compose --profile mysql up
+    profiles: [mysql]
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: mysql
+      MYSQL_DATABASE: clinic
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-pmysql"]
+      interval: 3s
+      retries: 30
+
+  api:
+    build: .
+    environment:
+      CLINIC_DB_URL: postgresql+psycopg://postgres:postgres@postgres:5432/clinic
+      SENTINEL_RESULTS_URL: postgresql+psycopg://postgres:postgres@postgres:5432/sentinel
+      SENTINEL_API_KEY: ${SENTINEL_API_KEY:-dev-key-change-me}
+      SENTINEL_CORS_ORIGINS: http://localhost:8080,http://localhost:5173
+    ports: ["8000:8000"]
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  web:
+    build: ./web
+    ports: ["8080:8080"]
+    depends_on: [api]
+
+  # Local observability: Prometheus scrapes the API's /metrics.
+  prometheus:
+    profiles: [observability]
+    image: prom/prometheus:v2.55.1
+    volumes: ["./deploy/prometheus.yml:/etc/prometheus/prometheus.yml:ro"]
+    ports: ["9090:9090"]
+
+volumes:
+  pgdata:
